@@ -110,7 +110,13 @@ func (b Builder) newEnvironment(ctx context.Context) (*environment, error) {
 		if err != nil {
 			return nil, err
 		}
-		err = tpl.Execute(&buf, tplCtx)
+
+		embedTplContext := embeddedModTemplateContext{
+			tplCtx,
+			b.EmbedDirs,
+		}
+
+		err = tpl.Execute(&buf, embedTplContext)
 		if err != nil {
 			return nil, err
 		}
@@ -373,6 +379,11 @@ func main() {
 }
 `
 
+type embeddedModTemplateContext struct {
+	goModTemplateContext
+	EmbedDirs []EmbedDir
+}
+
 // originally published in: https://github.com/mholt/caddy-embed
 const embeddedModuleTemplate = `package main
 
@@ -390,7 +401,9 @@ import (
 // file system. You can optionally change the go:embed directive
 // to embed other files or folders.
 //
-//go:embed files
+{{range .EmbedDirs -}}
+//go:embed {{if .IncludeAll}}all:{{end}}files/{{or .Name .Dir}}
+{{end -}}
 var embedded embed.FS
 
 // files is the actual, more generic file system to be utilized.
