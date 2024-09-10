@@ -92,15 +92,19 @@ func (b Builder) newEnvironment(ctx context.Context) (*environment, error) {
 	}
 
 	for _, d := range b.EmbedDirs {
-		err = copy(d.Dir, filepath.Join(tempFolder, "files", d.Name))
-		if err != nil {
-			return nil, err
-		}
 		_, err = os.Stat(d.Dir)
 		if err != nil {
 			return nil, fmt.Errorf("embed directory does not exist: %s", d.Dir)
 		}
+
 		log.Printf("[INFO] Embedding directory: %s", d.Dir)
+		err = copy(d.Dir, filepath.Join(tempFolder, "files", d.Name))
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if len(b.EmbedDirs) > 0 {
 		buf.Reset()
 		tpl, err = template.New("embed").Parse(embeddedModuleTemplate)
 		if err != nil {
