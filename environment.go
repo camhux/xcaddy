@@ -112,8 +112,8 @@ func (b Builder) newEnvironment(ctx context.Context) (*environment, error) {
 				return nil, err
 			}
 			log.Printf("[INFO] Writing 'embedded' module: %s\n%s", mainPath, buf.Bytes())
-			emedPath := filepath.Join(tempFolder, "embed.go")
-			err = os.WriteFile(emedPath, buf.Bytes(), 0o644)
+			embedPath := filepath.Join(tempFolder, "embed.go")
+			err = os.WriteFile(embedPath, buf.Bytes(), 0o644)
 			if err != nil {
 				return nil, err
 			}
