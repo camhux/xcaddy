@@ -49,10 +49,7 @@ type Builder struct {
 	ModFlags     string        `json:"mod_flags,omitempty"`
 
 	// Experimental: subject to change
-	EmbedDirs []struct {
-		Dir  string `json:"dir,omitempty"`
-		Name string `json:"name,omitempty"`
-	} `json:"embed_dir,omitempty"`
+	EmbedDirs []EmbedDir `json:"embed_dir,omitempty"`
 }
 
 // Build builds Caddy at the configured version with the
@@ -234,6 +231,35 @@ func NewReplace(old, new string) Replace {
 		Old: ReplacementPath(old),
 		New: ReplacementPath(new),
 	}
+}
+
+// EmbedDir specifies a directory to be embedded into the binary.
+type EmbedDir struct {
+	// The local path to the directory to embed.
+	Dir string `json:"dir,omitempty"`
+	// The synthetic root for the embedded directory in the binary's filesystem.
+	Name string `json:"name,omitempty"`
+	// Whether to include files in Dir that begin with `.` or `_`.
+	IncludeAll bool `json:"include_all,omitempty"`
+}
+
+func NewEmbedDir(input string) EmbedDir {
+	var out EmbedDir
+
+	// Do we have an `all:` prefix *and* a subsequent colon?
+	// If so, specify the field and slice off the prefix.
+	if after, found := strings.CutPrefix(input, "all:"); found && strings.Contains(after, ":") {
+		input = after
+		out.IncludeAll = true
+	}
+
+	out.Dir = input
+	if before, after, found := strings.Cut(input, ":"); found {
+		out.Dir = after
+		out.Name = before
+	}
+
+	return out
 }
 
 // newTempFolder creates a new folder in a temporary location.

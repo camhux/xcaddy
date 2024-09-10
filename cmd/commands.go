@@ -136,21 +136,7 @@ Flags:
 			ModFlags:     modFlags,
 		}
 		for _, md := range embedDir {
-			if before, after, found := strings.Cut(md, ":"); found {
-				builder.EmbedDirs = append(builder.EmbedDirs, struct {
-					Dir  string `json:"dir,omitempty"`
-					Name string `json:"name,omitempty"`
-				}{
-					after, before,
-				})
-			} else {
-				builder.EmbedDirs = append(builder.EmbedDirs, struct {
-					Dir  string `json:"dir,omitempty"`
-					Name string `json:"name,omitempty"`
-				}{
-					before, "",
-				})
-			}
+			builder.EmbedDirs = append(builder.EmbedDirs, xcaddy.NewEmbedDir(md))
 		}
 		err = builder.Build(cmd.Root().Context(), output)
 		if err != nil {

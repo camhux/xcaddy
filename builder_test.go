@@ -86,3 +86,91 @@ func TestNewReplace(t *testing.T) {
 		})
 	}
 }
+
+func TestNewEmbedDir(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		want  EmbedDir
+	}{
+		{
+			"Simple embed",
+			"/home/my/cool/files",
+			EmbedDir{
+				Dir: "/home/my/cool/files",
+			},
+		},
+		{
+			"Aliased embed",
+			"www:/home/my/cool/files",
+			EmbedDir{
+				Dir:  "/home/my/cool/files",
+				Name: "www",
+			},
+		},
+		{
+			"Aliased embed where alias=`all:`",
+			"all:/home/my/cool/files",
+			EmbedDir{
+				Dir:  "/home/my/cool/files",
+				Name: "all",
+			},
+		},
+		{
+			"Simple embed including hidden files with `all::`",
+			"all::/home/my/cool/files",
+			EmbedDir{
+				Dir:        "/home/my/cool/files",
+				IncludeAll: true,
+			},
+		},
+		{
+			"Aliased embed including hidden files with `all::`",
+			"all:www:/home/my/cool/files",
+			EmbedDir{
+				Dir:        "/home/my/cool/files",
+				Name:       "www",
+				IncludeAll: true,
+			},
+		},
+		/*
+			{
+				"Edge case: Single leading colon", // TODO(camhux): Is this the correct expectation?
+				":/home/my/cool/files",
+				EmbedDir{
+					Dir: "/home/my/cool/files",
+				},
+			},
+			{
+				"Edge case: Double leading colon", // TODO(camhux): Is this the correct expectation?
+				"::/home/my/cool/files",
+				EmbedDir{
+					Dir: "/home/my/cool/files",
+				},
+			},
+			{
+				"Edge case: Single leading colon with alias", // TODO(camhux): Is this the correct expectation?
+				":www:/home/my/cool/files",
+				EmbedDir{
+					Dir:  "/home/my/cool/files",
+					Name: "www",
+				},
+			},
+			{
+				"Edge case: Junk prefix with alias", // TODO(camhux): Is this the correct expectation?
+				"???:www:/home/my/cool/files",
+				EmbedDir{
+					Dir:  "/home/my/cool/files",
+					Name: "www",
+				},
+			},
+		*/
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := NewEmbedDir(tt.input); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewEmbedDir() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
